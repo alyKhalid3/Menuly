@@ -64,4 +64,6 @@ These are undecided. Do not pick an answer silently in code; ask, or leave a cle
 
 ## Agent tooling
 
-- `codebase-memory-mcp` and `graphify` may be set up locally (not committed). If available, use them to explore the code once it exists; after editing code, run `graphify update .` to keep its graph current.
+- Cursor config lives in `.cursor/`: the `codebase-memory-mcp` MCP server (`mcp.json`), the graphify rule (`rules/graphify.mdc`) and the Superpowers plugin (`settings.json`).
+- Both tools must be installed on the machine and on `PATH`: `codebase-memory-mcp` via its `install.ps1` with `--skip-config`, and graphify via `uv tool install graphifyy`.
+- After editing code, run `graphify update .` to keep the graph current. `graphify-out/` is git-ignored.
