@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guidance for AI coding agents working on Menuly. The full spec lives in `System-Requirement.md`; this file is the short version plus the rules that must not be broken.
+Guidance for AI coding agents working on Menuly. Requirements live in `System-Requirement.md`; the approved v1 design (decisions, schema, security, build order) lives in `docs/superpowers/specs/2026-10-17-menuly-v1-design.md`. When they disagree, the design doc wins. This file is the short version plus the rules that must not be broken.
 
 ## What Menuly is
 
@@ -29,6 +29,7 @@ These come from the requirements and protect real-world printed QR codes and ten
 5. **Uploads.** Check image type and size on the server, and compress images.
 6. **Abuse protection.** Rate-limit auth and write entry points.
 7. **Edits never change the link.** Saving a menu updates the public page in place; the URL and QR code stay the same (FR-6).
+8. **Secrets stay out of git.** Keys go in `.env.local` (git-ignored); commit only `.env.example` with variable names and no values.
 
 ## Templates
 
@@ -39,28 +40,20 @@ These come from the requirements and protect real-world printed QR codes and ten
 ## Public menu page
 
 - No login required. Mobile-first.
-- Arabic menus render RTL, English menus LTR, based on the menu's language (FR-19). Use logical CSS properties (`margin-inline-start`, etc.) rather than left/right.
+- Arabic renders RTL and English LTR, based on the language currently shown; bilingual menus have a language switch (FR-19). Use logical CSS properties (`margin-inline-start`, etc.) rather than left/right.
 - Performance target: visible content in under 2 seconds on 3G. Serve via caching (ISR or similar) and revalidate when the owner edits; do not query the database on every visit.
 
-## Data model (draft, not yet reviewed)
+## Data model
 
-`restaurants`, `menus` (template, language, immutable unique slug), `sections` (ordered), `items` (name, price, description, image, order), `template_extras` (jsonb per menu and template), `templates` (definitions and extra fields). Treat this as a starting point, not a decision.
+Defined in section 3 of the design doc. Key points: one restaurant per account and one menu per restaurant; Arabic and English text in paired columns (`name_ar`, `name_en`, ...) with a required primary language and an optional secondary that falls back to the primary; `template_extras` keyed by `(menu_id, template_id)`; `slug_holds` for reserved route names and 90-day holds on slugs from deleted accounts. The schema changes only through SQL files in `supabase/migrations/`.
 
 ## Out of scope for v1
 
 Payments and pricing plans, custom domains, online ordering or carts, a mobile app, analytics, more than two templates. Do not build these unless asked.
 
-## Open questions
+## Decisions
 
-These are undecided. Do not pick an answer silently in code; ask, or leave a clearly isolated default.
-
-- One fixed currency, or chosen per owner?
-- Can one account own several restaurants?
-- Draft and published states, or live immediately?
-- What happens to the link and slug when an account is deleted or a subscription expires?
-- Are item images in v1?
-- One language per menu, or bilingual menus?
-- Is an "item unavailable" flag needed?
+The requirements' open questions are resolved in section 1 of the design doc. Anything not covered there is undecided: ask rather than picking an answer silently in code.
 
 ## Agent tooling
 
