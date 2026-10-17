@@ -34,6 +34,10 @@ export async function proxy(request: NextRequest) {
     supabaseResponse.cookies.getAll().forEach((cookie) =>
       redirect.cookies.set(cookie),
     );
+    for (const header of ["cache-control", "expires", "pragma"] as const) {
+      const value = supabaseResponse.headers.get(header);
+      if (value) redirect.headers.set(header, value);
+    }
     return redirect;
   }
   return supabaseResponse;
