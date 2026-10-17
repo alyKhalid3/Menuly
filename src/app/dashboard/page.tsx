@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { deleteAccount } from "@/actions/account";
 import { signOut } from "@/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,6 +16,9 @@ export default async function DashboardPage() {
       <p className="mt-6">You have not created a menu yet.</p>
       <form action={signOut} className="mt-8">
         <button type="submit">Log out</button>
+      </form>
+      <form action={deleteAccount} className="mt-3">
+        <button type="submit">Delete account</button>
       </form>
     </main>
   );
