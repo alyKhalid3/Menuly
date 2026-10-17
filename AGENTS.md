@@ -10,7 +10,13 @@ User types: **owner** (builds and edits menus), **visitor** (views the public me
 
 ## Status
 
-Pre-code. Only the requirements document exists. There is no build, lint or test setup yet; when one is added, document the exact commands here.
+Foundation is in progress. Commands:
+
+- `npm run dev` starts the app.
+- `npm test` runs unit tests.
+- `npm run test:db` runs isolation tests against the Supabase project in `.env.test.local`.
+- `npm run db:push` applies `supabase/migrations/` to the database in `SUPABASE_DB_URL`.
+- `npm run lint` runs ESLint.
 
 ## Stack
 
@@ -60,3 +66,13 @@ The requirements' open questions are resolved in section 1 of the design doc. An
 - Cursor config lives in `.cursor/`: the `codebase-memory-mcp` MCP server (`mcp.json`), the graphify rule (`rules/graphify.mdc`) and the Superpowers plugin (`settings.json`).
 - Both tools must be installed on the machine and on `PATH`: `codebase-memory-mcp` via its `install.ps1` with `--skip-config`, and graphify via `uv tool install graphifyy`.
 - After editing code, run `graphify update .` to keep the graph current. `graphify-out/` is git-ignored.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
