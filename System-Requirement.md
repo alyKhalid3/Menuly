@@ -23,7 +23,7 @@ The problem it solves: a new restaurant needs a menu, and today someone has to d
 
 ### 3.2 Menu management
 
-- **FR-3:** An owner can create a new mesing a tenu, choomplate and a language (Arabic or English).
+- **FR-3:** An owner can create a new menu, choosing a template and a language (Arabic or English).
 - **FR-4:** Add, edit, delete and reorder **sections** (for example drinks, pizza).
 - **FR-5:** Add, edit, delete and reorder **items** inside each section: name, price, description, image.
 - **FR-6:** Edits appear on the public menu immediately, without the link or QR code changing.
