@@ -41,6 +41,7 @@ begin
   if not public.is_slug_available(p_slug) then
     raise exception 'slug is not available' using errcode = '23505';
   end if;
+  perform set_config('menuly.confirm_slug', 'on', true);
   update public.menus
   set slug = p_slug, slug_confirmed_at = now()
   where id = p_menu_id and slug is null and public.owns_menu(p_menu_id)
@@ -59,6 +60,7 @@ set search_path = public
 as $$
 declare
   old_slug text;
+  hold_reason text;
 begin
   if auth.role() is distinct from 'service_role' then
     raise exception 'service role required' using errcode = '42501';
@@ -70,8 +72,18 @@ begin
   if old_slug is null then
     raise exception 'menu has no slug' using errcode = '42501';
   end if;
-  insert into public.slug_holds (slug, reason, available_at)
-  values (old_slug, 'released', now() + interval '90 days');
+  select reason into hold_reason from public.slug_holds where slug = old_slug;
+  if found then
+    if hold_reason = 'reserved' then
+      raise exception 'cannot release reserved slug' using errcode = '42501';
+    end if;
+    update public.slug_holds
+    set available_at = now() + interval '90 days'
+    where slug = old_slug;
+  else
+    insert into public.slug_holds (slug, reason, available_at)
+    values (old_slug, 'released', now() + interval '90 days');
+  end if;
   update public.menus
   set slug = p_new_slug, slug_confirmed_at = now()
   where id = p_menu_id;
@@ -129,6 +141,40 @@ as $$
     on te.menu_id = m.id and te.template_id = m.template_id
   where m.slug = p_slug;
 $$;
+
+create or replace function public.protect_menu_slug()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if tg_op = 'INSERT' then
+    if new.slug is not null and auth.role() is distinct from 'service_role' then
+      raise exception 'menu slug cannot be set directly' using errcode = '42501';
+    end if;
+    return new;
+  end if;
+
+  if old.slug is not null and new.slug is distinct from old.slug then
+    if auth.role() is distinct from 'service_role' then
+      raise exception 'menu slug is immutable' using errcode = '42501';
+    end if;
+  end if;
+
+  if old.slug is null and new.slug is not null then
+    if auth.role() is distinct from 'service_role'
+       and current_setting('menuly.confirm_slug', true) is distinct from 'on' then
+      raise exception 'menu slug cannot be set directly' using errcode = '42501';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger menus_protect_slug_insert
+before insert on public.menus
+for each row execute function public.protect_menu_slug();
 
 create or replace function public.check_rate_limit(p_action text, p_max integer)
 returns boolean
