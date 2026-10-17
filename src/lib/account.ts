@@ -3,11 +3,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function deleteOwnerAccount(userId: string) {
   const admin = createAdminClient();
-  const { data: restaurant } = await admin
+  const { data: restaurant, error: restaurantError } = await admin
     .from("restaurants")
     .select("id, menus(slug)")
     .eq("owner_id", userId)
     .maybeSingle();
+  if (restaurantError) throw restaurantError;
 
   const slug = (restaurant as { menus: { slug: string | null } | null } | null)?.menus?.slug;
   if (slug) {
@@ -22,9 +23,13 @@ export async function deleteOwnerAccount(userId: string) {
 
   if (restaurant) {
     const folder = restaurant.id as string;
-    const { data: files } = await admin.storage.from("menu-images").list(folder);
+    const { data: files, error: listError } = await admin.storage.from("menu-images").list(folder);
+    if (listError) throw listError;
     if (files && files.length > 0) {
-      await admin.storage.from("menu-images").remove(files.map((file) => `${folder}/${file.name}`));
+      const { error: removeError } = await admin.storage
+        .from("menu-images")
+        .remove(files.map((file) => `${folder}/${file.name}`));
+      if (removeError) throw removeError;
     }
   }
 
