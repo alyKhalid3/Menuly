@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { modernFont } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={modernFont.className}>{children}</body>
     </html>
   );
 }
